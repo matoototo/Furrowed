@@ -1,9 +1,11 @@
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+#include <functional>
 #include <unordered_set>
 
 #include "board.hpp"
 #include "constants.hpp"
+
 
 void Board::reset_board() {
     is_white = true;
@@ -87,4 +89,119 @@ void Board::set_FEN(const std::string &FEN) {
     std::string after_en_passant = after_castling.substr(after_castling.find(' ')+1);
     fifty_move = std::stoi(after_en_passant.substr(0, after_en_passant.find(' ')));
     move_number = std::stoi(after_en_passant.substr(after_en_passant.find(' ')+1));
+}
+
+void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directions, const int start, bool slide) {
+    for (auto dir : directions) {
+        int index = start + dir;
+        do {
+            if (board[index] == 7) break;
+            if (board[index] != 0) {
+                if (is_white && board[index] < 0)
+                    moves.push_back(Move(start, index));
+                else if (!is_white && board[index] > 0)
+                    moves.push_back(Move(start, index));
+                break;
+            } else {
+                moves.push_back(Move(start, index));
+            }
+            index += dir;
+        } while (true && slide);
+    }
+}
+#define generator_sig std::vector<Move>& moves, const int start
+
+inline void Board::add_promotions(generator_sig, const int to) {
+    std::vector<int> target_promotions = is_white ? white_promotions : black_promotions;
+    for (auto promotion : target_promotions) {
+        moves.push_back(Move(start, to, promotion));
+    }
+}
+
+inline void Board::add_pawn_moves(generator_sig) {
+    int sign = is_white ? -1 : 1;
+    int promotion_rank = is_white ? 2 : 9;
+    int second_rank = is_white ? 8 : 3;
+    int current_rank = start / 10;
+    int to_rank = current_rank + 1;
+
+    if (board[start + 10*sign] == 0) {
+        if (to_rank == promotion_rank)
+            add_promotions(moves, start, start + 10*sign);
+        else
+            moves.push_back(Move(start, start + 10*sign));
+        if (current_rank == second_rank && board[start + 20*sign] == 0)
+            moves.push_back(Move(start, start + 20*sign));
+    }
+
+    if (board[start + 11*sign]*board[start] < 0) {
+        if (to_rank == promotion_rank)
+            add_promotions(moves, start, start + 11*sign);
+        else
+            moves.push_back(Move(start, start + 11*sign));
+    }
+
+    if (board[start + 9*sign]*board[start] < 0) {
+        if (to_rank == promotion_rank)
+            add_promotions(moves, start, start + 9*sign);
+        else
+            moves.push_back(Move(start, start + 9*sign));
+    }
+}
+
+inline void Board::add_knight_moves(generator_sig) {
+    std::vector<int> directions = {-21, -19, -12, -8, 8, 12, 19, 21};
+    add_moves(moves, directions, start, false);
+}
+
+inline void Board::add_bishop_moves(generator_sig) {
+    std::vector<int> directions = {-9, -11, 11, 9};
+    add_moves(moves, directions, start, true);
+}
+
+inline void Board::add_rook_moves(generator_sig) {
+    std::vector<int> directions = {-1, -10, 1, 10};
+    add_moves(moves, directions, start, true);
+}
+
+inline void Board::add_queen_moves(generator_sig) {
+    std::vector<int> directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+    add_moves(moves, directions, start, true);
+}
+
+inline void Board::add_king_moves(generator_sig) {
+    std::vector<int> directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+    add_moves(moves, directions, start, false);
+    // TODO: castling
+}
+
+std::vector<Move> Board::pseudo_legal_moves() {
+    std::vector<Move> pseudo_legal_moves;
+    std::unordered_map<int, std::function<void(generator_sig)>> generators = {
+        { 1, [this](generator_sig){add_pawn_moves(moves, start);}},
+        {-1, [this](generator_sig){add_pawn_moves(moves, start);}},
+        { 2, [this](generator_sig){add_knight_moves(moves, start);}},
+        {-2, [this](generator_sig){add_knight_moves(moves, start);}},
+        { 3, [this](generator_sig){add_bishop_moves(moves, start);}},
+        {-3, [this](generator_sig){add_bishop_moves(moves, start);}},
+        { 4, [this](generator_sig){add_rook_moves(moves, start);}},
+        {-4, [this](generator_sig){add_rook_moves(moves, start);}},
+        { 5, [this](generator_sig){add_queen_moves(moves, start);}},
+        {-5, [this](generator_sig){add_queen_moves(moves, start);}},
+        { 6, [this](generator_sig){add_king_moves(moves, start);}},
+        {-6, [this](generator_sig){add_king_moves(moves, start);}}
+    };
+
+    for (int i = 21; i < 99; ++i) {
+        if (i % 10 == 8) {
+            i += 2;
+            continue;
+        }
+        else if (board[i] == 0 || (board[i] > 0 && !is_white) || (board[i] < 0 && is_white)) {
+            continue;
+        }
+        int piece = board[i];
+        generators.at(piece)(pseudo_legal_moves, i);
+    }
+    return pseudo_legal_moves;
 }

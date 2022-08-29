@@ -17,7 +17,10 @@
 #define QUEEN_B -5
 #define KING_B -6
 
+#define square int
+
 #include <string>
+#include <vector>
 #include <unordered_map>
 
 const std::unordered_map<char, int> piece_map = {
@@ -35,3 +38,6 @@ const std::unordered_map<std::string, int> square_map = {
     {"a7", 81}, {"b7", 82}, {"c7", 83}, {"d7", 84}, {"e7", 85}, {"f7", 86}, {"g7", 87}, {"h7", 88},
     {"a8", 91}, {"b8", 92}, {"c8", 93}, {"d8", 94}, {"e8", 95}, {"f8", 96}, {"g8", 97}, {"h8", 98}
 };
+
+const std::vector<int> white_promotions = {KNIGHT_W, BISHOP_W, ROOK_W, QUEEN_W};
+const std::vector<int> black_promotions = {KNIGHT_B, BISHOP_B, ROOK_B, QUEEN_B};
