@@ -162,14 +162,14 @@ inline void Board::add_pawn_moves(generator_sig) {
             moves.push_back(Move(start, start + 20*sign));
     }
 
-    if (board[start + 11*sign]*board[start] < 0) {
+    if (board[start + 11*sign]*board[start] < 0 && board[start + 11*sign] != 7) {
         if (to_rank == promotion_rank)
             add_promotions(moves, start, start + 11*sign);
         else
             moves.push_back(Move(start, start + 11*sign));
     }
 
-    if (board[start + 9*sign]*board[start] < 0) {
+    if (board[start + 9*sign]*board[start] < 0 && board[start + 9*sign] != 7) {
         if (to_rank == promotion_rank)
             add_promotions(moves, start, start + 9*sign);
         else
