@@ -277,6 +277,47 @@ std::vector<Move> Board::pseudo_legal_moves() {
     return pseudo_legal_moves;
 }
 
+std::vector<Move> Board::legal_moves() {
+    int king_square = find_king();
+    if (king_square == -1) {
+        throw std::runtime_error("No king found");
+
+    }
+    std::vector<Move> legal_moves;
+    for (auto move : pseudo_legal_moves()) {
+        if (move_is_legal(move, king_square)) {
+            legal_moves.push_back(move);
+        }
+    }
+    return legal_moves;
+}
+
+int Board::find_king() {
+    int sign = is_white ? 1 : -1;
+    for (int i = 21; i < 99; ++i) {
+        if (i % 10 == 9) {
+            i += 1;
+            continue;
+        }
+        else if (board[i] == KING_W*sign) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+bool Board::is_in_check(int king_square) {
+    std::vector<int> attackers = {};
+    add_attackers(attackers, king_square);
+    return attackers.size() != 0;
+}
+
+bool Board::move_is_legal(const Move& move, int king_square) {
+    Board copy_board = *this;
+    copy_board.make_move(move);
+    copy_board.is_white = !copy_board.is_white;
+    return !copy_board.is_in_check(king_square);
+}
 
 void Board::print_board() const {
     for (int i = 21; i < 99; ++i) {

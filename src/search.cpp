@@ -16,13 +16,11 @@ void BFS(const Board& start, int depth) {
         if (board.ply_number - starting_ply_number >= depth) {
             break;
         }
-        for (const auto& move : board.pseudo_legal_moves()) {
+        for (const auto& move : board.legal_moves()) {
             Board new_board = board;
             new_board.make_move(move);
-            if (std::find(visited.begin(), visited.end(), new_board) == visited.end()) {
-                visited.push_back(new_board);
-                queue.push(new_board);
-            }
+            visited.push_back(new_board);
+            queue.push(new_board);
         }
     }
     std::cout << "Visited " << visited.size() << " boards" << std::endl;

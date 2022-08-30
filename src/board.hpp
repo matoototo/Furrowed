@@ -19,7 +19,7 @@ struct Board {
     void set_FEN(const std::string&);
     void print_board() const;
     void make_move(const Move&);
-    std::vector<Move> legal_moves(bool);
+    std::vector<Move> legal_moves();
     std::vector<Move> pseudo_legal_moves();
 
     std::vector<int> board;
@@ -57,4 +57,7 @@ struct Board {
     void add_rook_moves(std::vector<Move>&, const int);
     void add_queen_moves(std::vector<Move>&, const int);
     void add_king_moves(std::vector<Move>&, const int);
+    bool move_is_legal(const Move&, int);
+    bool is_in_check(const int);
+    int find_king();
 };
