@@ -276,3 +276,22 @@ std::vector<Move> Board::pseudo_legal_moves() {
     }
     return pseudo_legal_moves;
 }
+
+
+void Board::print_board() const {
+    for (int i = 21; i < 99; ++i) {
+        int real_i = int(i / 10) * 10 + 9 - (i % 10); // flip horizontally
+        if (i % 10 == 9) {
+            i += 1;
+            std::cout << '\n';
+            continue;
+        }
+        if (board[real_i] == 0)
+            std::cout << ' ';
+        else {
+            std::cout << piece_str_map.at(board[real_i]);
+        }
+    }
+    std::cout << std::endl;
+}
+

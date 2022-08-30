@@ -17,6 +17,7 @@ struct Board {
 
     void reset_board();
     void set_FEN(const std::string&);
+    void print_board() const;
     std::vector<Move> legal_moves(bool);
     std::vector<Move> pseudo_legal_moves();
 
