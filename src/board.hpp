@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <unordered_set>
 
 #include "move.hpp"
 
@@ -31,7 +32,8 @@ struct Board {
 
     private:
 
-    void add_moves(std::vector<Move>&, const std::vector<int>&, const int, bool);
+    void add_moves(std::vector<Move>&, const std::vector<int>&, const int, bool, int);
+    void add_attackers(std::vector<int>&, const int);
     void add_promotions(std::vector<Move>&, const int, const int);
     void add_pawn_moves(std::vector<Move>&, const int);
     void add_knight_moves(std::vector<Move>&, const int);

@@ -45,7 +45,7 @@ void Board::set_FEN(const std::string &FEN) {
         if (integers.find(c) != integers.end()) {
             index += (c - '0');
         } else if (piece_map.find(c) != piece_map.end()) {
-            board[index] = piece_map.at(c);
+            board[int(index/10) * 10 + 9 - index % 10] = piece_map.at(c);
             index++;
         } else if (c == '/') {
             index += 2;
@@ -70,11 +70,14 @@ void Board::set_FEN(const std::string &FEN) {
 
     if (castling.find('K') != std::string::npos) {
         castle_K = true;
-    } else if (castling.find('Q') != std::string::npos) {
+    }
+    if (castling.find('Q') != std::string::npos) {
         castle_Q = true;
-    } else if (castling.find('k') != std::string::npos) {
+    }
+    if (castling.find('k') != std::string::npos) {
         castle_k = true;
-    } else if (castling.find('q') != std::string::npos) {
+    }
+    if (castling.find('q') != std::string::npos) {
         castle_q = true;
     }
 
@@ -91,11 +94,12 @@ void Board::set_FEN(const std::string &FEN) {
     move_number = std::stoi(after_en_passant.substr(after_en_passant.find(' ')+1));
 }
 
-void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directions, const int start, bool slide) {
+void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directions, const int start, bool slide, int target = 0) {
     for (auto dir : directions) {
         int index = start + dir;
         do {
             if (board[index] == 7) break;
+            if (target != 0 && board[index] != target && board[index] != 0) break;
             if (board[index] != 0) {
                 if (is_white && board[index] < 0)
                     moves.push_back(Move(start, index));
@@ -103,12 +107,36 @@ void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directio
                     moves.push_back(Move(start, index));
                 break;
             } else {
-                moves.push_back(Move(start, index));
+                if (target == 0) moves.push_back(Move(start, index));
             }
             index += dir;
         } while (true && slide);
     }
 }
+
+void Board::add_attackers(std::vector<int>& attackers, const int square) {
+    // this is done by placing a pseudo-piece on that figure of each type, and checking
+    // if any of the squares it attacks are occupied by the same piece of an opposite colour
+    int sign = is_white ? -1 : 1;
+    std::vector<Move> moves;
+    std::vector<int> pawn_directions = {sign*9, sign*11};
+    add_moves(moves, pawn_directions, square, false, PAWN_W*sign);
+    std::vector<int> knight_directions = {-21, -19, -12, -8, 8, 12, 19, 21};
+    add_moves(moves, knight_directions, square, false, KNIGHT_W*sign);
+    std::vector<int> bishop_directions = {-9, -11, 11, 9};
+    add_moves(moves, bishop_directions, square, true, BISHOP_W*sign);
+    std::vector<int> rook_directions = {-1, -10, 1, 10};
+    add_moves(moves, rook_directions, square, true, ROOK_W*sign);
+    std::vector<int> queen_directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+    add_moves(moves, queen_directions, square, true, QUEEN_W*sign);
+    std::vector<int> king_directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+    add_moves(moves, king_directions, square, false, KING_W*sign);
+
+    for (auto move : moves) {
+        attackers.push_back(move.to);
+    }
+}
+
 #define generator_sig std::vector<Move>& moves, const int start
 
 inline void Board::add_promotions(generator_sig, const int to) {
@@ -172,7 +200,50 @@ inline void Board::add_queen_moves(generator_sig) {
 inline void Board::add_king_moves(generator_sig) {
     std::vector<int> directions = {-1, -10, 1, 10, -11, -9, 9, 11};
     add_moves(moves, directions, start, false);
-    // TODO: castling
+
+
+    std::vector<int> attackers = {};
+    add_attackers(attackers, start);
+    if (attackers.size() != 0) return;
+
+    int b_square, c_square, d_square, f_square, g_square, kingside, queenside;
+    if (is_white) {
+        b_square = 97; c_square = 96; d_square = 95;
+        f_square = 93; g_square = 92;
+        kingside = castle_K * CASTLE_KW; queenside = castle_Q * CASTLE_QW;
+    } else {
+        b_square = 27; c_square = 26; d_square = 25;
+        f_square = 23; g_square = 22;
+        kingside = castle_k * CASTLE_KB; queenside = castle_q * CASTLE_QB;
+    }
+
+    if (kingside) {
+        if (board[f_square] == 0 && board[g_square] == 0) {
+            add_attackers(attackers, f_square);
+            add_attackers(attackers, g_square);
+            if (attackers.size() == 0) {
+                moves.push_back(Move(start, g_square, 0, kingside));
+            }
+        }
+
+    }
+    attackers = {};
+    if (queenside) {
+        if (board[b_square] == 0 && board[c_square] == 0 && board[d_square] == 0) {
+            add_attackers(attackers, c_square);
+            add_attackers(attackers, d_square);
+            if (attackers.size() == 0)
+                moves.push_back(Move(start, c_square, 0, queenside));
+            else {
+                for (auto attack : attackers) {
+                    std::cout << c_square << " " << d_square << std::endl;
+                    std::cout << "attack: " << attack << std::endl;
+                }
+            }
+        }
+    }
+
+    add_attackers(attackers, start);
 }
 
 std::vector<Move> Board::pseudo_legal_moves() {
