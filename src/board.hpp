@@ -32,6 +32,20 @@ struct Board {
     uint fifty_move;
     int ply_number;
 
+    bool operator==(const Board& other) const {
+        return (
+            board == other.board &&
+            is_white == other.is_white &&
+            castle_K == other.castle_K &&
+            castle_Q == other.castle_Q &&
+            castle_k == other.castle_k &&
+            castle_q == other.castle_q &&
+            en_passant == other.en_passant &&
+            fifty_move == other.fifty_move &&
+            ply_number == other.ply_number
+        );
+    };
+
     private:
 
     void add_moves(std::vector<Move>&, const std::vector<int>&, const int, bool, int);
