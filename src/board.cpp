@@ -264,8 +264,8 @@ std::vector<Move> Board::pseudo_legal_moves() {
     };
 
     for (int i = 21; i < 99; ++i) {
-        if (i % 10 == 8) {
-            i += 2;
+        if (i % 10 == 9) {
+            i += 1;
             continue;
         }
         else if (board[i] == 0 || (board[i] > 0 && !is_white) || (board[i] < 0 && is_white)) {
