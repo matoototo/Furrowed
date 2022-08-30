@@ -151,7 +151,7 @@ inline void Board::add_pawn_moves(generator_sig) {
     int promotion_rank = is_white ? 2 : 9;
     int second_rank = is_white ? 8 : 3;
     int current_rank = start / 10;
-    int to_rank = current_rank + 1;
+    int to_rank = current_rank + sign*1;
 
     if (board[start + 10*sign] == 0) {
         if (to_rank == promotion_rank)
