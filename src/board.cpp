@@ -295,3 +295,78 @@ void Board::print_board() const {
     std::cout << std::endl;
 }
 
+void Board::make_move(const Move& move) {
+    int sign = (board[move.from] > 0) ? -1 : 1;
+
+    if (board[move.to] != 0 || sign*board[move.from] == PAWN_B) {
+        fifty_move = 0;
+    } else {
+        fifty_move += 1;
+    }
+
+    if (move.to == en_passant) {
+        board[move.to - sign * 10] = 0;
+    }
+
+    en_passant = 0;
+
+    if (board[move.from] == PAWN_W && (move.from/10 - move.to/10) == 2) {
+        en_passant = move.from - 10;
+    } else if (board[move.from] == PAWN_B && (move.to/10 - move.from/10) == 2) {
+        en_passant = move.from + 10;
+    }
+
+    board[move.to] = board[move.from];
+    board[move.from] = 0;
+
+    if (move.promotion != 0) {
+        board[move.to] = move.promotion;
+    }
+
+    if (move.castling == CASTLE_KW) {
+        board[93] = board[91];
+        board[91] = 0;
+    } else if (move.castling == CASTLE_QW) {
+        board[95] = board[98];
+        board[98] = 0;
+    } else if (move.castling == CASTLE_KB) {
+        board[23] = board[21];
+        board[21] = 0;
+    } else if (move.castling == CASTLE_QB) {
+        board[25] = board[28];
+        board[28] = 0;
+    }
+
+    if (board[move.from] == KING_W) {
+        castle_K = false;
+        castle_Q = false;
+    } else if (board[move.from] == KING_B) {
+        castle_k = false;
+        castle_q = false;
+    } else if (board[move.from] == ROOK_W) {
+        if (move.from == 91) {
+            castle_K = false;
+        } else if (move.from == 98) {
+            castle_Q = false;
+        }
+    } else if (board[move.from] == ROOK_B) {
+        if (move.from == 21) {
+            castle_k = false;
+        } else if (move.from == 28) {
+            castle_q = false;
+        }
+    }
+
+    if (move.to == 91) {
+        castle_K = false;
+    } else if (move.to == 98) {
+        castle_Q = false;
+    } else if (move.to == 21) {
+        castle_k = false;
+    } else if (move.to == 28) {
+        castle_q = false;
+    }
+
+    if (!is_white) move_number += 1;
+    is_white = !is_white;
+}
