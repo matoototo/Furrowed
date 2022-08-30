@@ -30,7 +30,7 @@ struct Board {
     bool castle_q;
     int en_passant;
     uint fifty_move;
-    uint move_number;
+    int ply_number;
 
     private:
 

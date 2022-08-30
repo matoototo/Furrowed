@@ -15,7 +15,7 @@ void Board::reset_board() {
     castle_q = false;
     en_passant = -1;
     fifty_move = 0;
-    move_number = 1;
+    ply_number = 1;
     board = {
         7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
         7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
@@ -91,7 +91,7 @@ void Board::set_FEN(const std::string &FEN) {
 
     std::string after_en_passant = after_castling.substr(after_castling.find(' ')+1);
     fifty_move = std::stoi(after_en_passant.substr(0, after_en_passant.find(' ')));
-    move_number = std::stoi(after_en_passant.substr(after_en_passant.find(' ')+1));
+    ply_number = 2*std::stoi(after_en_passant.substr(after_en_passant.find(' ')+1));
 }
 
 void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directions, const int start, bool slide, int target = 0) {
@@ -367,6 +367,6 @@ void Board::make_move(const Move& move) {
         castle_q = false;
     }
 
-    if (!is_white) move_number += 1;
+    ply_number += 1;
     is_white = !is_white;
 }
