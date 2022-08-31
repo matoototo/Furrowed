@@ -94,7 +94,7 @@ void Board::set_FEN(const std::string &FEN) {
     ply_number = 2*std::stoi(after_en_passant.substr(after_en_passant.find(' ')+1));
 }
 
-void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directions, const int start, bool slide, int target = 0) {
+void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directions, const int start, bool slide, int target = 0) const {
     for (auto dir : directions) {
         int index = start + dir;
         do {
@@ -114,7 +114,7 @@ void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directio
     }
 }
 
-void Board::add_attackers(std::vector<int>& attackers, const int square) {
+void Board::add_attackers(std::vector<int>& attackers, const int square) const {
     // this is done by placing a pseudo-piece on that figure of each type, and checking
     // if any of the squares it attacks are occupied by the same piece of an opposite colour
     int sign = is_white ? -1 : 1;
@@ -139,14 +139,14 @@ void Board::add_attackers(std::vector<int>& attackers, const int square) {
 
 #define generator_sig std::vector<Move>& moves, const int start
 
-inline void Board::add_promotions(generator_sig, const int to) {
+inline void Board::add_promotions(generator_sig, const int to) const {
     std::vector<int> target_promotions = is_white ? white_promotions : black_promotions;
     for (auto promotion : target_promotions) {
         moves.push_back(Move(start, to, promotion));
     }
 }
 
-inline void Board::add_pawn_moves(generator_sig) {
+inline void Board::add_pawn_moves(generator_sig) const {
     int sign = is_white ? -1 : 1;
     int promotion_rank = is_white ? 2 : 9;
     int second_rank = is_white ? 8 : 3;
@@ -180,27 +180,27 @@ inline void Board::add_pawn_moves(generator_sig) {
     }
 }
 
-inline void Board::add_knight_moves(generator_sig) {
+inline void Board::add_knight_moves(generator_sig) const {
     std::vector<int> directions = {-21, -19, -12, -8, 8, 12, 19, 21};
     add_moves(moves, directions, start, false);
 }
 
-inline void Board::add_bishop_moves(generator_sig) {
+inline void Board::add_bishop_moves(generator_sig) const {
     std::vector<int> directions = {-9, -11, 11, 9};
     add_moves(moves, directions, start, true);
 }
 
-inline void Board::add_rook_moves(generator_sig) {
+inline void Board::add_rook_moves(generator_sig) const {
     std::vector<int> directions = {-1, -10, 1, 10};
     add_moves(moves, directions, start, true);
 }
 
-inline void Board::add_queen_moves(generator_sig) {
+inline void Board::add_queen_moves(generator_sig) const {
     std::vector<int> directions = {-1, -10, 1, 10, -11, -9, 9, 11};
     add_moves(moves, directions, start, true);
 }
 
-inline void Board::add_king_moves(generator_sig) {
+inline void Board::add_king_moves(generator_sig) const {
     std::vector<int> directions = {-1, -10, 1, 10, -11, -9, 9, 11};
     add_moves(moves, directions, start, false);
 
@@ -241,7 +241,7 @@ inline void Board::add_king_moves(generator_sig) {
     }
 }
 
-std::vector<Move> Board::pseudo_legal_moves() {
+std::vector<Move> Board::pseudo_legal_moves() const {
     std::vector<Move> pseudo_legal_moves;
     std::unordered_map<int, std::function<void(generator_sig)>> generators = {
         {PAWN_W, [this](generator_sig){add_pawn_moves(moves, start);}},
@@ -272,7 +272,7 @@ std::vector<Move> Board::pseudo_legal_moves() {
     return pseudo_legal_moves;
 }
 
-std::vector<Move> Board::legal_moves() {
+std::vector<Move> Board::legal_moves() const {
     int king_square = find_king();
     if (king_square == -1) {
         throw std::runtime_error("No king found");
@@ -286,7 +286,7 @@ std::vector<Move> Board::legal_moves() {
     return legal_moves;
 }
 
-int Board::find_king() {
+int Board::find_king() const {
     int sign = is_white ? 1 : -1;
     for (int i = 21; i < 99; ++i) {
         if (i % 10 == 9) {
@@ -300,13 +300,13 @@ int Board::find_king() {
     return -1;
 }
 
-bool Board::is_in_check(int king_square) {
+bool Board::is_in_check(int king_square) const {
     std::vector<int> attackers = {};
     add_attackers(attackers, king_square);
     return attackers.size() != 0;
 }
 
-bool Board::move_is_legal(const Move& move, int king_square) {
+bool Board::move_is_legal(const Move& move, int king_square) const {
     Board copy_board = *this;
     copy_board.make_move(move);
     copy_board.is_white = !copy_board.is_white;
