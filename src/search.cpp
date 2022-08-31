@@ -1,8 +1,10 @@
 #include "board.hpp"
 #include "search.hpp"
+#include "evaluate.hpp"
 
 #include <stack>
 #include <queue>
+#include <utility>
 #include <iostream>
 #include <algorithm>
 
@@ -52,4 +54,22 @@ void DFS(const Board& start, int depth) {
     }
     std::cout << captures << " " << en_passants << " " << castles << " " << promotions << std::endl;
     std::cout << "Visited " << count << " boards" << std::endl;
+}
+
+std::pair<int, Move> negamax(const Board& board, int depth) {
+    if (depth == 0) {
+        return {evaluate(board), Move()};
+    }
+    int best_value = -1000000;
+    Move best_move;
+    for (const auto& move : board.legal_moves()) {
+        Board new_board = board;
+        new_board.make_move(move);
+        int value = -negamax(new_board, depth - 1).first;
+        if (value > best_value) {
+            best_value = value;
+            best_move = move;
+        }
+    }
+    return {best_value, best_move};
 }
