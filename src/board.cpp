@@ -342,7 +342,7 @@ void Board::make_move(const Move& move) {
         fifty_move += 1;
     }
 
-    if (move.to == en_passant) {
+    if (board[move.from] == sign*PAWN_B && move.to == en_passant) {
         board[move.to - sign * 10] = 0;
     }
 
