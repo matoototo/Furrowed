@@ -211,12 +211,12 @@ inline void Board::add_king_moves(generator_sig) {
 
     int b_square, c_square, d_square, f_square, g_square, kingside, queenside;
     if (is_white) {
-        b_square = B8; c_square = C8; d_square = D8;
-        f_square = F8; g_square = G8;
-        kingside = castle_K * CASTLE_KW; queenside = castle_Q * CASTLE_QW;
-    } else {
         b_square = B1; c_square = C1; d_square = D1;
         f_square = F1; g_square = G1;
+        kingside = castle_K * CASTLE_KW; queenside = castle_Q * CASTLE_QW;
+    } else {
+        b_square = B8; c_square = C8; d_square = D8;
+        f_square = F8; g_square = G8;
         kingside = castle_k * CASTLE_KB; queenside = castle_q * CASTLE_QB;
     }
 

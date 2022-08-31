@@ -7,7 +7,7 @@
 #include <algorithm>
 
 void BFS(const Board& start, int depth) {
-    int count = 0;
+    long long count = 0;
     std::queue<Board> queue;
     queue.push(start);
     int starting_ply_number = start.ply_number;
@@ -31,7 +31,7 @@ void BFS(const Board& start, int depth) {
 }
 
 void DFS(const Board& start, int depth) {
-    int count = 0;
+    long long count = 0;
     std::stack<Board> stack;
     stack.push(start);
     int starting_ply_number = start.ply_number;
