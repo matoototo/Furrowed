@@ -162,18 +162,21 @@ inline void Board::add_pawn_moves(generator_sig) {
             moves.push_back(Move(start, start + 20*sign));
     }
 
-    if (board[start + 11*sign]*board[start] < 0 && board[start + 11*sign] != 7) {
+
+    int to = start + 11*sign;
+    if ((board[to]*board[start] < 0 && board[to] != 7) || to == en_passant) {
         if (to_rank == promotion_rank)
-            add_promotions(moves, start, start + 11*sign);
+            add_promotions(moves, start, to);
         else
-            moves.push_back(Move(start, start + 11*sign));
+            moves.push_back(Move(start, to));
     }
 
-    if (board[start + 9*sign]*board[start] < 0 && board[start + 9*sign] != 7) {
+    to = start + 9*sign;
+    if ((board[to]*board[start] < 0 && board[to] != 7) || to == en_passant) {
         if (to_rank == promotion_rank)
-            add_promotions(moves, start, start + 9*sign);
+            add_promotions(moves, start, to);
         else
-            moves.push_back(Move(start, start + 9*sign));
+            moves.push_back(Move(start, to));
     }
 }
 
@@ -234,16 +237,8 @@ inline void Board::add_king_moves(generator_sig) {
             add_attackers(attackers, d_square);
             if (attackers.size() == 0)
                 moves.push_back(Move(start, c_square, 0, queenside));
-            else {
-                for (auto attack : attackers) {
-                    std::cout << c_square << " " << d_square << std::endl;
-                    std::cout << "attack: " << attack << std::endl;
-                }
-            }
         }
     }
-
-    add_attackers(attackers, start);
 }
 
 std::vector<Move> Board::pseudo_legal_moves() {
@@ -281,7 +276,6 @@ std::vector<Move> Board::legal_moves() {
     int king_square = find_king();
     if (king_square == -1) {
         throw std::runtime_error("No king found");
-
     }
     std::vector<Move> legal_moves;
     for (auto move : pseudo_legal_moves()) {
@@ -316,6 +310,9 @@ bool Board::move_is_legal(const Move& move, int king_square) {
     Board copy_board = *this;
     copy_board.make_move(move);
     copy_board.is_white = !copy_board.is_white;
+    if (move.from == king_square) {
+        king_square = move.to;
+    }
     return !copy_board.is_in_check(king_square);
 }
 
@@ -378,19 +375,19 @@ void Board::make_move(const Move& move) {
         board[28] = 0;
     }
 
-    if (board[move.from] == KING_W) {
+    if (board[move.to] == KING_W) {
         castle_K = false;
         castle_Q = false;
-    } else if (board[move.from] == KING_B) {
+    } else if (board[move.to] == KING_B) {
         castle_k = false;
         castle_q = false;
-    } else if (board[move.from] == ROOK_W) {
+    } else if (board[move.to] == ROOK_W) {
         if (move.from == 91) {
             castle_K = false;
         } else if (move.from == 98) {
             castle_Q = false;
         }
-    } else if (board[move.from] == ROOK_B) {
+    } else if (board[move.to] == ROOK_B) {
         if (move.from == 21) {
             castle_k = false;
         } else if (move.from == 28) {
