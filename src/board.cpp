@@ -333,7 +333,7 @@ void Board::print_board() const {
     std::cout << std::endl;
 }
 
-void Board::make_move(const Move& move) {
+void Board::make_move(const Move& move, bool count) {
     int sign = (board[move.from] > 0) ? -1 : 1;
 
     if (board[move.to] != 0 || sign*board[move.from] == PAWN_B) {
@@ -343,6 +343,7 @@ void Board::make_move(const Move& move) {
     }
 
     if (board[move.from] == sign*PAWN_B && move.to == en_passant) {
+        if (count) en_passants += 1;
         board[move.to - sign * 10] = 0;
     }
 
@@ -354,12 +355,17 @@ void Board::make_move(const Move& move) {
         en_passant = move.from + 10;
     }
 
+    if (count && board[move.to] != BLANK) captures += 1;
+
     board[move.to] = board[move.from];
     board[move.from] = 0;
 
     if (move.promotion != 0) {
+        if (count) promotions += 1;
         board[move.to] = move.promotion;
     }
+
+    if (count && move.castling != 0) castles += 1;
 
     if (move.castling == CASTLE_KW) {
         board[F1] = board[H1];

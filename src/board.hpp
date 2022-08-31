@@ -7,6 +7,11 @@
 
 #include "move.hpp"
 
+inline int captures = 0;
+inline int en_passants = 0;
+inline int castles = 0;
+inline int promotions = 0;
+
 struct Board {
     Board() {
         reset_board();
@@ -18,7 +23,7 @@ struct Board {
     void reset_board();
     void set_FEN(const std::string&);
     void print_board() const;
-    void make_move(const Move&);
+    void make_move(const Move&, bool count = false);
     std::vector<Move> legal_moves();
     std::vector<Move> pseudo_legal_moves();
 

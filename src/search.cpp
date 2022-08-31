@@ -22,10 +22,11 @@ void BFS(const Board& start, int depth) {
                 count++;
             }
             Board new_board = board;
-            new_board.make_move(move);
+            new_board.make_move(move, true);
             queue.push(new_board);
         }
     }
+    std::cout << captures << " " << en_passants << " " << castles << " " << promotions << std::endl;
     std::cout << "Visited " << count << " boards" << std::endl;
 }
 
@@ -45,9 +46,10 @@ void DFS(const Board& start, int depth) {
                 count++;
             }
             Board new_board = board;
-            new_board.make_move(move);
+            new_board.make_move(move, true);
             stack.push(new_board);
         }
     }
+    std::cout << captures << " " << en_passants << " " << castles << " " << promotions << std::endl;
     std::cout << "Visited " << count << " boards" << std::endl;
 }
