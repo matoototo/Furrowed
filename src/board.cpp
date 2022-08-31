@@ -98,9 +98,9 @@ void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directio
     for (auto dir : directions) {
         int index = start + dir;
         do {
-            if (board[index] == 7) break;
-            if (target != 0 && board[index] != target && board[index] != 0) break;
-            if (board[index] != 0) {
+            if (board[index] == OUT) break;
+            if (target != 0 && board[index] != target && board[index] != BLANK) break;
+            if (board[index] != BLANK) {
                 if (is_white && board[index] < 0)
                     moves.push_back(Move(start, index));
                 else if (!is_white && board[index] > 0)
@@ -153,7 +153,7 @@ inline void Board::add_pawn_moves(generator_sig) {
     int current_rank = start / 10;
     int to_rank = current_rank + sign*1;
 
-    if (board[start + 10*sign] == 0) {
+    if (board[start + 10*sign] == BLANK) {
         if (to_rank == promotion_rank)
             add_promotions(moves, start, start + 10*sign);
         else
@@ -164,7 +164,7 @@ inline void Board::add_pawn_moves(generator_sig) {
 
 
     int to = start + 11*sign;
-    if ((board[to]*board[start] < 0 && board[to] != 7) || to == en_passant) {
+    if ((board[to]*board[start] < 0 && board[to] != OUT) || to == en_passant) {
         if (to_rank == promotion_rank)
             add_promotions(moves, start, to);
         else
@@ -172,7 +172,7 @@ inline void Board::add_pawn_moves(generator_sig) {
     }
 
     to = start + 9*sign;
-    if ((board[to]*board[start] < 0 && board[to] != 7) || to == en_passant) {
+    if ((board[to]*board[start] < 0 && board[to] != OUT) || to == en_passant) {
         if (to_rank == promotion_rank)
             add_promotions(moves, start, to);
         else
@@ -211,17 +211,17 @@ inline void Board::add_king_moves(generator_sig) {
 
     int b_square, c_square, d_square, f_square, g_square, kingside, queenside;
     if (is_white) {
-        b_square = 97; c_square = 96; d_square = 95;
-        f_square = 93; g_square = 92;
+        b_square = B8; c_square = C8; d_square = D8;
+        f_square = F8; g_square = G8;
         kingside = castle_K * CASTLE_KW; queenside = castle_Q * CASTLE_QW;
     } else {
-        b_square = 27; c_square = 26; d_square = 25;
-        f_square = 23; g_square = 22;
+        b_square = B1; c_square = C1; d_square = D1;
+        f_square = F1; g_square = G1;
         kingside = castle_k * CASTLE_KB; queenside = castle_q * CASTLE_QB;
     }
 
     if (kingside) {
-        if (board[f_square] == 0 && board[g_square] == 0) {
+        if (board[f_square] == BLANK && board[g_square] == BLANK) {
             add_attackers(attackers, f_square);
             add_attackers(attackers, g_square);
             if (attackers.size() == 0) {
@@ -232,7 +232,7 @@ inline void Board::add_king_moves(generator_sig) {
     }
     attackers = {};
     if (queenside) {
-        if (board[b_square] == 0 && board[c_square] == 0 && board[d_square] == 0) {
+        if (board[b_square] == BLANK && board[c_square] == BLANK && board[d_square] == BLANK) {
             add_attackers(attackers, c_square);
             add_attackers(attackers, d_square);
             if (attackers.size() == 0)
@@ -244,18 +244,18 @@ inline void Board::add_king_moves(generator_sig) {
 std::vector<Move> Board::pseudo_legal_moves() {
     std::vector<Move> pseudo_legal_moves;
     std::unordered_map<int, std::function<void(generator_sig)>> generators = {
-        { 1, [this](generator_sig){add_pawn_moves(moves, start);}},
-        {-1, [this](generator_sig){add_pawn_moves(moves, start);}},
-        { 2, [this](generator_sig){add_knight_moves(moves, start);}},
-        {-2, [this](generator_sig){add_knight_moves(moves, start);}},
-        { 3, [this](generator_sig){add_bishop_moves(moves, start);}},
-        {-3, [this](generator_sig){add_bishop_moves(moves, start);}},
-        { 4, [this](generator_sig){add_rook_moves(moves, start);}},
-        {-4, [this](generator_sig){add_rook_moves(moves, start);}},
-        { 5, [this](generator_sig){add_queen_moves(moves, start);}},
-        {-5, [this](generator_sig){add_queen_moves(moves, start);}},
-        { 6, [this](generator_sig){add_king_moves(moves, start);}},
-        {-6, [this](generator_sig){add_king_moves(moves, start);}}
+        {PAWN_W, [this](generator_sig){add_pawn_moves(moves, start);}},
+        {PAWN_B, [this](generator_sig){add_pawn_moves(moves, start);}},
+        {KNIGHT_W, [this](generator_sig){add_knight_moves(moves, start);}},
+        {KNIGHT_B, [this](generator_sig){add_knight_moves(moves, start);}},
+        {BISHOP_W, [this](generator_sig){add_bishop_moves(moves, start);}},
+        {BISHOP_B, [this](generator_sig){add_bishop_moves(moves, start);}},
+        {ROOK_W, [this](generator_sig){add_rook_moves(moves, start);}},
+        {ROOK_B, [this](generator_sig){add_rook_moves(moves, start);}},
+        {QUEEN_W, [this](generator_sig){add_queen_moves(moves, start);}},
+        {QUEEN_B, [this](generator_sig){add_queen_moves(moves, start);}},
+        {KING_W, [this](generator_sig){add_king_moves(moves, start);}},
+        {KING_B, [this](generator_sig){add_king_moves(moves, start);}}
     };
 
     for (int i = 21; i < 99; ++i) {
@@ -263,7 +263,7 @@ std::vector<Move> Board::pseudo_legal_moves() {
             i += 1;
             continue;
         }
-        else if (board[i] == 0 || (board[i] > 0 && !is_white) || (board[i] < 0 && is_white)) {
+        else if (board[i] == BLANK || (board[i] > 0 && !is_white) || (board[i] < 0 && is_white)) {
             continue;
         }
         int piece = board[i];
@@ -324,7 +324,7 @@ void Board::print_board() const {
             std::cout << '\n';
             continue;
         }
-        if (board[real_i] == 0)
+        if (board[real_i] == BLANK)
             std::cout << ' ';
         else {
             std::cout << piece_str_map.at(board[real_i]);
@@ -362,19 +362,20 @@ void Board::make_move(const Move& move) {
     }
 
     if (move.castling == CASTLE_KW) {
-        board[93] = board[91];
-        board[91] = 0;
+        board[F1] = board[H1];
+        board[H1] = 0;
     } else if (move.castling == CASTLE_QW) {
-        board[95] = board[98];
-        board[98] = 0;
+        board[D1] = board[A1];
+        board[A1] = 0;
     } else if (move.castling == CASTLE_KB) {
-        board[23] = board[21];
-        board[21] = 0;
+        board[F8] = board[H8];
+        board[H8] = 0;
     } else if (move.castling == CASTLE_QB) {
-        board[25] = board[28];
-        board[28] = 0;
+        board[D8] = board[A8];
+        board[A8] = 0;
     }
 
+    // remove castling rights on king/rook move
     if (board[move.to] == KING_W) {
         castle_K = false;
         castle_Q = false;
@@ -382,26 +383,27 @@ void Board::make_move(const Move& move) {
         castle_k = false;
         castle_q = false;
     } else if (board[move.to] == ROOK_W) {
-        if (move.from == 91) {
+        if (move.from == H1) {
             castle_K = false;
-        } else if (move.from == 98) {
+        } else if (move.from == A1) {
             castle_Q = false;
         }
     } else if (board[move.to] == ROOK_B) {
-        if (move.from == 21) {
+        if (move.from == H8) {
             castle_k = false;
-        } else if (move.from == 28) {
+        } else if (move.from == A8) {
             castle_q = false;
         }
     }
 
-    if (move.to == 91) {
+    // if something moves to rook positions, we know we can't castle anymore
+    if (move.to == H1) {
         castle_K = false;
-    } else if (move.to == 98) {
+    } else if (move.to == A1) {
         castle_Q = false;
-    } else if (move.to == 21) {
+    } else if (move.to == H8) {
         castle_k = false;
-    } else if (move.to == 28) {
+    } else if (move.to == A8) {
         castle_q = false;
     }
 
