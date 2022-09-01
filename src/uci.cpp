@@ -40,8 +40,9 @@ void UCI::position(std::istringstream &is) {
     while (is >> command) {
         if (command == "fen") {
             std::string fen, part;
-            // fen is made up of multiple strings separated by spaces
-            while (is >> part) {
+            // fen is made up of 6 strings separated by spaces
+            for (int i = 0; i < 6; ++i) {
+                is >> part;
                 fen += part + " ";
             }
             board = Board(fen);
