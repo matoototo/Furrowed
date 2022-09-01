@@ -1,16 +1,18 @@
+#include "uci.hpp"
 #include "board.hpp"
+#include "search.hpp"
+#include "engine.hpp"
+#include "evaluate.hpp"
+#include "constants.hpp"
 
 #include <chrono>
 #include <iostream>
 
 int main() {
-    Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e4 0 1");
-    // time the execution of 1e6 calls to boards.pseudo_legal_moves()
-    auto start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 1e6; i++) {
-        board.pseudo_legal_moves();
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    Engine engine{};
+    engine.board.set_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    UCI uci = UCI(engine);
+    uci.run();
+
     return 0;
 }

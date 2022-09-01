@@ -4,6 +4,7 @@
 
 #include <stack>
 #include <queue>
+#include <atomic>
 #include <utility>
 #include <iostream>
 #include <algorithm>
@@ -56,8 +57,8 @@ void DFS(const Board& start, int depth) {
     std::cout << "Visited " << count << " boards" << std::endl;
 }
 
-std::pair<int, Move> negamax(const Board& board, int depth) {
-    if (depth == 0) {
+std::pair<int, Move> negamax(const Board& board, int depth, std::atomic<bool>& stop) {
+    if (depth == 0 || stop) {
         return {evaluate(board), Move()};
     }
     int best_value = -1000000;
@@ -65,7 +66,7 @@ std::pair<int, Move> negamax(const Board& board, int depth) {
     for (const auto& move : board.legal_moves()) {
         Board new_board = board;
         new_board.make_move(move);
-        int value = -negamax(new_board, depth - 1).first;
+        int value = -negamax(new_board, depth - 1, stop).first;
         if (value > best_value) {
             best_value = value;
             best_move = move;

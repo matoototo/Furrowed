@@ -11,7 +11,7 @@ std::string Move::to_str() const {
         }
     } else {
         if (promotion) {
-            str = index_to_coord(from) + index_to_coord(to) + "=" + piece_str_map.at(promotion);
+            str = index_to_coord(from) + index_to_coord(to) + (char)tolower(piece_str_map.at(promotion));
         } else {
             str = index_to_coord(from) + index_to_coord(to);
         }
