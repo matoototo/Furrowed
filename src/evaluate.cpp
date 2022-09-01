@@ -9,7 +9,11 @@ int evaluate(const Board& board) {
             i += 1;
             continue;
         }
-        eval += piece_value_map.at(board.board[i]);
+        int piece = board.board[i];
+        if (piece != BLANK) {
+            eval += piece_value_map.at(piece);
+            eval += placement_value_map.at(piece).at(i);
+        }
     }
     return sign * eval;
 }
