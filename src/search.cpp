@@ -65,13 +65,41 @@ std::pair<int, Move> negamax(const Board& board, int depth, std::atomic<bool>& s
     }
     int best_value = -1000000;
     Move best_move;
-    for (const auto& move : board.legal_moves()) {
+    auto moves = board.legal_moves();
+    if (moves.size() == 0) return {0, Move()};
+    for (const auto& move : moves) {
         Board new_board = board;
         new_board.make_move(move);
         int value = -negamax(new_board, depth - 1, stop, think_until).first;
         if (value > best_value || best_value == -1000000) {
             best_value = value;
             best_move = move;
+        }
+    }
+    return {best_value, best_move};
+}
+
+std::pair<int, Move> alpha_beta(const Board& board, int depth, int alpha, int beta, std::atomic<bool>& stop, long long think_until) {
+    if (depth == 0 || stop || now() > think_until) {
+        return {evaluate(board), Move()};
+    }
+    int best_value = -1000000;
+    Move best_move;
+    auto moves = board.legal_moves();
+    if (moves.size() == 0) return {0, Move()};
+    for (const auto& move : moves) {
+        Board new_board = board;
+        new_board.make_move(move);
+        int value = -alpha_beta(new_board, depth - 1, -beta, -alpha, stop, think_until).first;
+        if (value > best_value || best_value == -1000000) {
+            best_value = value;
+            best_move = move;
+        }
+        if (best_value > alpha) {
+            alpha = best_value;
+        }
+        if (alpha >= beta) {
+            break;
         }
     }
     return {best_value, best_move};
