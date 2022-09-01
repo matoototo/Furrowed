@@ -1,5 +1,7 @@
 #pragma once
 
+struct Board;
+
 #include <string>
 
 struct Move {
@@ -14,6 +16,7 @@ struct Move {
         return std::string(1, 'h' + 1 - (index % 10)) + std::string(1, '8' - (index - 20) / 10);
     }
     std::string to_str() const;
+    static Move from_str(std::string, Board&);
 
     int from;
     int to;

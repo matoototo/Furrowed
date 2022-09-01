@@ -13,22 +13,26 @@ void Engine::set_move(Move move) {
 
 void Engine::think(const Time& t) {
     // currently only supports infinite and wtime/btime
-    int thinktime = board.is_white ? t.wtime / 40 : t.btime / 40;
+    long long thinktime = board.is_white ? t.wtime / 40 : t.btime / 40;
     if (t.infinite) {
         thinktime = 1e9;
     }
     // current time
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = now();
 
-    for (int depth = 1; start + std::chrono::milliseconds(thinktime) > std::chrono::high_resolution_clock::now() && !stop; ++depth) {
+    std::cout << "info string thinking for " << thinktime << "ms" << std::endl;
+
+    long long think_until = now() + thinktime;
+
+    for (int depth = 1; think_until > now() && !stop; ++depth) {
         // search
-        std::pair<int, Move> p = negamax(board, depth, stop);
+        std::pair<int, Move> p = negamax(board, depth, stop, think_until);
         if (!stop) { // we shouldn't trust the output if it aborted
             set_move(p.second);
             // logging here, maybe move it outside of Engine with a callback?
             std::cout << "info depth " << depth << std::endl;
             std::cout << "info score cp " << p.first
-                      <<  " time " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count()
+                      <<  " time " << now() - start
                       << " pv " << p.second.to_str()
                       << std::endl;
         }

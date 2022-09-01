@@ -1,9 +1,11 @@
+#include "time.hpp"
 #include "board.hpp"
 #include "search.hpp"
 #include "evaluate.hpp"
 
 #include <stack>
 #include <queue>
+#include <chrono>
 #include <atomic>
 #include <utility>
 #include <iostream>
@@ -57,8 +59,8 @@ void DFS(const Board& start, int depth) {
     std::cout << "Visited " << count << " boards" << std::endl;
 }
 
-std::pair<int, Move> negamax(const Board& board, int depth, std::atomic<bool>& stop) {
-    if (depth == 0 || stop) {
+std::pair<int, Move> negamax(const Board& board, int depth, std::atomic<bool>& stop, long long think_until) {
+    if (depth == 0 || stop || now() > think_until) {
         return {evaluate(board), Move()};
     }
     int best_value = -1000000;
@@ -66,7 +68,7 @@ std::pair<int, Move> negamax(const Board& board, int depth, std::atomic<bool>& s
     for (const auto& move : board.legal_moves()) {
         Board new_board = board;
         new_board.make_move(move);
-        int value = -negamax(new_board, depth - 1, stop).first;
+        int value = -negamax(new_board, depth - 1, stop, think_until).first;
         if (value > best_value) {
             best_value = value;
             best_move = move;

@@ -7,6 +7,7 @@ struct UCI {
 
     void run();
     void go(std::istringstream& is);
+    void position(std::istringstream& is);
 
     Engine& engine;
 };

@@ -6,6 +6,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "move.hpp"
+
 void UCI::go(std::istringstream& is) {
     std::string command;
     Time t;
@@ -29,6 +31,28 @@ void UCI::go(std::istringstream& is) {
     }
     // start thinking async
     engine.thread = std::thread(&Engine::think, &engine, t);
+}
+
+void UCI::position(std::istringstream &is) {
+    std::string command;
+    Board board;
+    while (is >> command) {
+        if (command == "fen") {
+            std::string fen, part;
+            // fen is made up of multiple strings separated by spaces
+            while (is >> part) {
+                fen += part + " ";
+            }
+            board = Board(fen);
+        } else if (command == "startpos") {
+            board = Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        } else if (command == "moves") {
+            while (is >> command) {
+                board.make_move(Move::from_str(command, board));
+            }
+        }
+    }
+    engine.board = board;
 }
 
 void UCI::run() {
@@ -60,7 +84,7 @@ void UCI::run() {
         else if (command == "ucinewgame")
             engine.board.set_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         else if (command == "position")
-            ; // set position
+            position(is);
         else if (command == "go" && engine.stop) {
             go(is);
         }

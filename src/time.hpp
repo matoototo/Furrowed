@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 struct Time {
     bool ponder = false;
     int wtime = 0;
@@ -13,3 +15,7 @@ struct Time {
     int movetime = 0;
     bool infinite = false;
 };
+
+inline long long now() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
