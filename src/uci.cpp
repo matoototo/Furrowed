@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "move.hpp"
+#include "evaluate.hpp"
 
 void UCI::go(std::istringstream& is) {
     std::string command;
@@ -85,8 +86,19 @@ void UCI::run() {
             engine.board.set_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         else if (command == "position")
             position(is);
-        else if (command == "go" && engine.stop) {
+        else if (command == "go" && engine.stop)
             go(is);
+        else if (command == "legalmoves") {
+            for (Move move : engine.board.legal_moves()) {
+                std::cout << move.to_str() << " ";
+            }
+        }
+        else if (command == "eval") {
+            std::string move;
+            is >> move;
+            Board temp_board = engine.board;
+            temp_board.make_move(Move::from_str(move, temp_board));
+            std::cout << evaluate(temp_board) << std::endl;
         }
 
     } while (command != "quit"); // The command-line arguments are one-shot
