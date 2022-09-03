@@ -29,6 +29,7 @@ void Engine::think(const Time& t) {
         std::pair<int, Move> p = alpha_beta(board, depth, -1e9, 1e9, stop, think_until);
         if (!stop) { // we shouldn't trust the output if it aborted
             set_move(p.second);
+            if (p.first == 1000000 || p.first == -1000000) break;
             // logging here, maybe move it outside of Engine with a callback?
             std::cout << "info depth " << depth << std::endl;
             std::cout << "info score cp " << p.first

@@ -101,6 +101,9 @@ std::pair<int, Move> alpha_beta(const Board& board, int depth, int alpha, int be
         if (alpha >= beta) {
             break;
         }
+        if (alpha == 1000000) {
+            break;
+        }
     }
     return {best_value, best_move};
 }
