@@ -86,7 +86,11 @@ std::pair<int, Move> alpha_beta(const Board& board, int depth, int alpha, int be
     int best_value = -1000000;
     Move best_move;
     auto moves = board.legal_moves();
-    if (moves.size() == 0) return {0, Move()};
+    if (moves.size() == 0) {
+        if (board.is_in_check(board.find_king()))
+            return {-1000000, Move()};
+        return {0, Move()};
+    }
     for (const auto& move : moves) {
         Board new_board = board;
         new_board.make_move(move);

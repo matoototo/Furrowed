@@ -51,6 +51,9 @@ struct Board {
         );
     };
 
+    bool is_in_check(const int) const;
+    int find_king(bool flip = false) const;
+
     private:
 
     void add_moves(std::vector<Move>&, const std::vector<int>&, const int, bool, int) const;
@@ -63,6 +66,4 @@ struct Board {
     void add_queen_moves(std::vector<Move>&, const int) const;
     void add_king_moves(std::vector<Move>&, const int) const;
     bool move_is_legal(const Move&, int) const;
-    bool is_in_check(const int) const;
-    int find_king() const;
 };

@@ -286,8 +286,9 @@ std::vector<Move> Board::legal_moves() const {
     return legal_moves;
 }
 
-int Board::find_king() const {
+int Board::find_king(bool flip) const {
     int sign = is_white ? 1 : -1;
+    if (flip) sign *= -1;
     for (int i = 21; i < 99; ++i) {
         if (i % 10 == 9) {
             i += 1;
