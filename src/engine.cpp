@@ -27,7 +27,8 @@ void Engine::think(const Time& t) {
     for (int depth = 1; think_until > now() && !stop; ++depth) {
         // search
         std::pair<int, Move> p = alpha_beta(board, depth, -1e9, 1e9, stop, think_until);
-        if (!stop) { // we shouldn't trust the output if it aborted
+        // we shouldn't trust the output if it aborted, but if it's d1 it's better than nothing
+        if ((!stop && now() <= think_until) || depth == 1) {
             set_move(p.second);
             if (p.first == 1000000 || p.first == -1000000) break;
             // logging here, maybe move it outside of Engine with a callback?
