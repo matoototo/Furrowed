@@ -286,6 +286,26 @@ std::vector<Move> Board::legal_moves() const {
     return legal_moves;
 }
 
+bool Board::move_is_forcing(const Move& move, int king_square) const {
+    if (board[move.to] != BLANK) return true;
+    return false;
+    // TODO: Try enabling checks as forcing when hash is implemented
+    // Board board = *this;
+    // board.make_move(move);
+    // return board.is_in_check(king_square);
+}
+
+std::vector<Move> Board::forcing_moves() const {
+    std::vector<Move> forcing_moves;
+    int king_pos = find_king(false);
+    for (auto move : legal_moves()) {
+        if (move_is_forcing(move, king_pos)) {
+            forcing_moves.push_back(move);
+        }
+    }
+    return forcing_moves;
+}
+
 int Board::find_king(bool flip) const {
     int sign = is_white ? 1 : -1;
     if (flip) sign *= -1;

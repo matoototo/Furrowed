@@ -26,6 +26,9 @@ struct Board {
     void make_move(const Move&, bool count = false);
     std::vector<Move> legal_moves() const;
     std::vector<Move> pseudo_legal_moves() const;
+    std::vector<Move> forcing_moves() const;
+    bool is_in_check(const int) const;
+    int find_king(bool flip = false) const;
 
     std::vector<int> board;
     bool is_white;
@@ -51,11 +54,7 @@ struct Board {
         );
     };
 
-    bool is_in_check(const int) const;
-    int find_king(bool flip = false) const;
-
     private:
-
     void add_moves(std::vector<Move>&, const std::vector<int>&, const int, bool, int) const;
     void add_attackers(std::vector<int>&, const int) const;
     void add_promotions(std::vector<Move>&, const int, const int) const;
@@ -66,4 +65,5 @@ struct Board {
     void add_queen_moves(std::vector<Move>&, const int) const;
     void add_king_moves(std::vector<Move>&, const int) const;
     bool move_is_legal(const Move&, int) const;
+    bool move_is_forcing(const Move&, int) const;
 };
