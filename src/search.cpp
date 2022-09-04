@@ -79,14 +79,15 @@ std::pair<int, Move> negamax(const Board& board, int depth, std::atomic<bool>& s
     return {best_value, best_move};
 }
 
-int Quiesce(const Board& board, int alpha, int beta) {
+int Quiesce(const Board& board, int alpha, int beta, long long think_until) {
+    if (now() > think_until) return beta; // abort
     int stand_pat = evaluate(board);
     if (stand_pat >= beta) return beta;
     if (stand_pat > alpha) alpha = stand_pat;
     for (const auto& move : board.forcing_moves()) {
         Board new_board = board;
         new_board.make_move(move);
-        int score = -Quiesce(new_board, -beta, -alpha);
+        int score = -Quiesce(new_board, -beta, -alpha, think_until);
         if (score >= beta) return beta;
         if (score > alpha) alpha = score;
     }
@@ -95,7 +96,12 @@ int Quiesce(const Board& board, int alpha, int beta) {
 
 std::pair<int, Move> alpha_beta(const Board& board, int depth, int alpha, int beta, std::atomic<bool>& stop, long long think_until) {
     if (depth == 0 || stop || now() > think_until) {
-        return {Quiesce(board, alpha, beta), Move()};
+        if (depth == 0) {
+            auto q_value = Quiesce(board, alpha, beta, think_until);
+            return {q_value, Move()};
+        } else {
+            return {beta, Move()};
+        }
     }
     int best_value = -1000000;
     Move best_move;
