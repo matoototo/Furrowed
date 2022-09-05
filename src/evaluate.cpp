@@ -1,6 +1,20 @@
 #include "move.hpp"
 #include "evaluate.hpp"
 
+int doubled_pawns(const Board& board) {
+    int eval = 0;
+    for (int rank = 1; rank < 9; ++rank) {
+        int w_pawns = 0; int b_pawns = 0;
+        for (int file = 20; file < 90; file += 10) {
+            if (board.board[rank+file] == 1) w_pawns++;
+            else if (board.board[rank+file] == -1) b_pawns++;
+        }
+        if (w_pawns > 1) eval -= (w_pawns-1)*50;
+        if (b_pawns > 1) eval += (b_pawns-1)*50;
+    }
+    return eval;
+}
+
 int king_distance(const Board& board, int current_eval) {
     int sign = board.is_white ? 1 : -1;
     int king_pos = board.find_king(true);
@@ -52,5 +66,6 @@ int evaluate(const Board& board) {
         }
     }
     eval -= king_distance(board, eval);
+    eval += doubled_pawns(board);
     return sign * eval;
 }
