@@ -3,9 +3,9 @@
 
 int doubled_pawns(const Board& board) {
     int eval = 0;
-    for (int rank = 1; rank < 9; ++rank) {
+    for (int file = 1; file < 9; ++file) {
         int w_pawns = 0; int b_pawns = 0;
-        for (int file = 20; file < 90; file += 10) {
+        for (int rank = 20; rank < 90; rank += 10) {
             if (board.board[rank+file] == 1) w_pawns++;
             else if (board.board[rank+file] == -1) b_pawns++;
         }
