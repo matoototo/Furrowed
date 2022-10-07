@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <stdexcept>
 #include <functional>
 #include <unordered_set>
@@ -272,6 +273,24 @@ std::vector<Move> Board::pseudo_legal_moves() const {
     return pseudo_legal_moves;
 }
 
+bool is_capture(const Board& board, const Move& move) {
+    return board.board[move.to] != BLANK;
+}
+
+bool is_check(const Board& board, const Move& move) {
+    auto board_copy = board;
+    board_copy.make_move(move);
+    return board_copy.is_in_check(board_copy.find_king());
+}
+
+std::function<bool(const Move&, const Move&)> move_order(const Board& board) {
+    return [&board](const Move& a, const Move& b) {
+        if (is_capture(board, a) && !is_capture(board, b)) return true;
+        // if (is_check(board, a) && !is_check(board, b)) return true; TODO: segfault
+        return false;
+    };
+}
+
 std::vector<Move> Board::legal_moves() const {
     int king_square = find_king();
     if (king_square == -1) {
@@ -283,6 +302,7 @@ std::vector<Move> Board::legal_moves() const {
             legal_moves.push_back(move);
         }
     }
+    std::sort(legal_moves.begin(), legal_moves.end(), move_order(*this));
     return legal_moves;
 }
 
