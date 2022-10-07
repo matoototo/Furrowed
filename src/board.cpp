@@ -435,7 +435,7 @@ void Board::make_move(const Move& move, bool count) {
         board[move.to - sign * 10] = 0;
     }
 
-    en_passant = 0;
+    en_passant = -1;
 
     if (board[move.from] == PAWN_W && (move.from/10 - move.to/10) == 2) {
         en_passant = move.from - 10;
