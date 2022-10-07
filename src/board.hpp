@@ -29,6 +29,7 @@ struct Board {
     std::vector<Move> forcing_moves() const;
     bool is_in_check(const int) const;
     int find_king(bool flip = false) const;
+    std::string to_fen() const;
 
     std::vector<int> board;
     bool is_white;

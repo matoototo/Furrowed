@@ -95,6 +95,53 @@ void Board::set_FEN(const std::string &FEN) {
     ply_number = 2*std::stoi(after_en_passant.substr(after_en_passant.find(' ')+1));
 }
 
+std::string Board::to_fen() const {
+    std::string s = "";
+    int count = 0;
+    for (int i = H8; i <= A1; ++i) {
+        int real_i = int(i / 10) * 10 + 9 - (i % 10); // flip horizontally
+        if (i % 10 == 9) {
+            i += 1;
+            if (count) s += std::to_string(count);
+            count = 0;
+            s += '/';
+            continue;
+        }
+        if (i % 10 == 0) {
+            continue;
+        }
+        if (board[real_i] == 0) {
+            ++count;
+        } else {
+            if (count) s += std::to_string(count);
+            count = 0;
+            s += piece_str_map.at(board[real_i]);
+        }
+    }
+
+    s += is_white ? " w " : " b ";
+
+    if (castle_K)
+        s += 'K';
+    if (castle_Q)
+        s += 'Q';
+    if (castle_k)
+        s += 'k';
+    if (castle_q)
+        s += 'q';
+    if (!castle_K && !castle_Q && !castle_k && !castle_q)
+        s += '-';
+    s += ' ';
+
+    if (en_passant != -1)
+        s += index_map.at(en_passant);
+    else
+        s += '-';
+
+    s += ' ' + std::to_string(fifty_move) + ' ' + std::to_string(ply_number/2);
+    return s;
+}
+
 void Board::add_moves(std::vector<Move>& moves, const std::vector<int>& directions, const int start, bool slide, int target = 0) const {
     for (auto dir : directions) {
         int index = start + dir;
