@@ -8,7 +8,7 @@
 #include <atomic>
 
 struct Engine {
-    Engine() : move_mutex(), stop(true) {}
+    Engine() : move_mutex(), stop(true), nodes(0) {}
     Engine(Board board): board(board), move_mutex(), stop(true) {}
 
     void think(const Time& t);
@@ -19,4 +19,5 @@ struct Engine {
     std::mutex move_mutex;
     std::thread thread;
     std::atomic<bool> stop;
+    std::atomic<int> nodes;
 };

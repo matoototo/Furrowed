@@ -94,7 +94,7 @@ int Quiesce(const Board& board, int alpha, int beta, long long think_until) {
     return alpha;
 }
 
-std::pair<int, Move> alpha_beta(const Board& board, int depth, int alpha, int beta, std::atomic<bool>& stop, long long think_until) {
+std::pair<int, Move> alpha_beta(Engine& engine, const Board& board, int depth, int alpha, int beta, std::atomic<bool>& stop, long long think_until) {
     if (depth == 0 || stop || now() > think_until) {
         if (depth == 0) {
             auto q_value = Quiesce(board, alpha, beta, think_until);
@@ -114,7 +114,8 @@ std::pair<int, Move> alpha_beta(const Board& board, int depth, int alpha, int be
     for (const auto& move : moves) {
         Board new_board = board;
         new_board.make_move(move);
-        int value = -alpha_beta(new_board, depth - 1, -beta, -alpha, stop, think_until).first;
+        ++engine.nodes;
+        int value = -alpha_beta(engine, new_board, depth - 1, -beta, -alpha, stop, think_until).first;
         if (value > best_value || best_value == -1000000) {
             best_value = value;
             best_move = move;
