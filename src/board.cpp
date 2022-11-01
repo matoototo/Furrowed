@@ -118,6 +118,7 @@ std::string Board::to_fen() const {
             s += piece_str_map.at(board[real_i]);
         }
     }
+    if (count) s += std::to_string(count);
 
     s += is_white ? " w " : " b ";
 
