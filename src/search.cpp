@@ -103,17 +103,44 @@ std::pair<int, Move> alpha_beta(Engine& engine, const Board& board, int depth, i
             return {beta, Move()};
         }
     }
+
     int best_value = -1000000;
     Move best_move;
+
     auto moves = board.legal_moves();
+
     if (moves.size() == 0) {
         if (board.is_in_check(board.find_king()))
             return {-1000000, Move()};
         return {0, Move()};
     }
-    for (const auto& move : moves) {
+
+    auto probing_result = engine.table.probe(board);
+    if (probing_result.second && std::find(moves.begin(), moves.end(), probing_result.first.best) != moves.end()) {
+        // this doesn't work for some reason, causes very silly moves
+        // if (probing_result.first.depth >= depth && probing_result.first.value < beta && probing_result.first.value >= alpha) {
+        //     return {probing_result.first.value, probing_result.first.best};
+        // } else {
+        best_move = probing_result.first.best;
+        // somehow avoid duplicating code? I'm not sure how
         Board new_board = board;
-        new_board.make_move(move);
+        new_board.make_move(probing_result.first.best, false, &engine.table);
+        ++engine.nodes;
+        best_value = -alpha_beta(engine, new_board, depth - 1, -beta, -alpha, stop, think_until).first;
+        if (best_value > alpha) {
+            alpha = best_value;
+        }
+        if (alpha >= beta || alpha == 1000000) {
+            engine.table.add(board, best_move, best_value, depth, 1);
+            return {best_value, best_move};
+        }
+        // }
+    }
+
+    for (const auto& move : moves) {
+        if (probing_result.second && move == probing_result.first.best) continue;
+        Board new_board = board;
+        new_board.make_move(move, false, &engine.table);
         ++engine.nodes;
         int value = -alpha_beta(engine, new_board, depth - 1, -beta, -alpha, stop, think_until).first;
         if (value > best_value || best_value == -1000000) {
@@ -130,5 +157,6 @@ std::pair<int, Move> alpha_beta(Engine& engine, const Board& board, int depth, i
             break;
         }
     }
+    engine.table.add(board, best_move, best_value, depth, 1);
     return {best_value, best_move};
 }

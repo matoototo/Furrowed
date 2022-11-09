@@ -2,6 +2,7 @@
 
 #include "board.hpp"
 #include "time.hpp"
+#include "table.hpp"
 
 #include <mutex>
 #include <thread>
@@ -16,6 +17,7 @@ struct Engine {
 
     Board board;
     Move move;
+    Table table{1024};
     std::mutex move_mutex;
     std::thread thread;
     std::atomic<bool> stop;

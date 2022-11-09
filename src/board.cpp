@@ -6,6 +6,7 @@
 
 #include "board.hpp"
 #include "constants.hpp"
+#include "table.hpp"
 
 
 void Board::reset_board() {
@@ -422,7 +423,10 @@ void Board::print_board() const {
     std::cout << std::endl;
 }
 
-void Board::make_move(const Move& move, bool count) {
+void Board::make_move(const Move& move, bool count, Table* table_ptr) {
+    // TODO: restructure hierarchy to make passing table easier than this
+    bool update_hash = table_ptr != nullptr;
+
     int sign = (board[move.from] > 0) ? -1 : 1;
 
     if (board[move.to] != 0 || sign*board[move.from] == PAWN_B) {
@@ -433,7 +437,12 @@ void Board::make_move(const Move& move, bool count) {
 
     if (board[move.from] == sign*PAWN_B && move.to == en_passant) {
         if (count) en_passants += 1;
-        board[move.to - sign * 10] = 0;
+
+        int killed_square = move.to - sign * 10;
+        if (update_hash) {
+            table_ptr->hash_piece(hash, killed_square, board[killed_square]);
+        }
+        board[killed_square] = 0;
     }
 
     en_passant = -1;
@@ -446,11 +455,17 @@ void Board::make_move(const Move& move, bool count) {
 
     if (count && board[move.to] != BLANK) captures += 1;
 
+    if (update_hash) {
+        table_ptr->hash_piece(hash, move.from, board[move.from]);
+        table_ptr->hash_piece(hash, move.to, board[move.from]);
+    }
     board[move.to] = board[move.from];
     board[move.from] = 0;
 
     if (move.promotion != 0) {
         if (count) promotions += 1;
+        if (update_hash)
+            table_ptr->hash_piece(hash, move.to, move.promotion);
         board[move.to] = move.promotion;
     }
 
@@ -474,34 +489,60 @@ void Board::make_move(const Move& move, bool count) {
     if (board[move.to] == KING_W) {
         castle_K = false;
         castle_Q = false;
+        if (update_hash) {
+            hash ^= table_ptr->wk_hash;
+            hash ^= table_ptr->wq_hash;
+        }
     } else if (board[move.to] == KING_B) {
         castle_k = false;
         castle_q = false;
+        if (update_hash) {
+            hash ^= table_ptr->bk_hash;
+            hash ^= table_ptr->bq_hash;
+        }
     } else if (board[move.to] == ROOK_W) {
         if (move.from == H1) {
             castle_K = false;
+            if (update_hash)
+               hash ^= table_ptr->wk_hash;
         } else if (move.from == A1) {
             castle_Q = false;
+            if (update_hash)
+                hash ^= table_ptr->wq_hash;
         }
     } else if (board[move.to] == ROOK_B) {
         if (move.from == H8) {
             castle_k = false;
+            if (update_hash)
+                hash ^= table_ptr->bk_hash;
         } else if (move.from == A8) {
             castle_q = false;
+            if (update_hash)
+                hash ^= table_ptr->bq_hash;
         }
     }
 
     // if something moves to rook positions, we know we can't castle anymore
     if (move.to == H1) {
         castle_K = false;
+        if (update_hash)
+            hash ^= table_ptr->wk_hash;
     } else if (move.to == A1) {
         castle_Q = false;
+        if (update_hash)
+            hash ^= table_ptr->wq_hash;
     } else if (move.to == H8) {
         castle_k = false;
+        if (update_hash)
+            hash ^= table_ptr->bk_hash;
     } else if (move.to == A8) {
         castle_q = false;
+        if (update_hash)
+            hash ^= table_ptr->bq_hash;
     }
 
     ply_number += 1;
     is_white = !is_white;
+    if (update_hash)
+        hash ^= table_ptr->btm_hash;
 }

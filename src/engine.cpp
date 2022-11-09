@@ -19,6 +19,7 @@ void Engine::think(const Time& t) {
     }
     // current time
     auto start = now();
+    board.generate_hash(table);
     nodes = 0;
 
     std::cout << "info string thinking for " << thinktime << "ms" << std::endl;

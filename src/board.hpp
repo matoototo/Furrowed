@@ -6,6 +6,7 @@
 #include <unordered_set>
 
 #include "move.hpp"
+#include "table.hpp"
 
 inline int captures = 0;
 inline int en_passants = 0;
@@ -23,7 +24,10 @@ struct Board {
     void reset_board();
     void set_FEN(const std::string&);
     void print_board() const;
-    void make_move(const Move&, bool count = false);
+    void make_move(const Move&, bool count = false, Table* table_ptr = nullptr);
+    void generate_hash(const Table& t) {
+        hash = t.zobrist_hash(*this);
+    }
     std::vector<Move> legal_moves() const;
     std::vector<Move> pseudo_legal_moves() const;
     std::vector<Move> forcing_moves() const;
@@ -38,6 +42,7 @@ struct Board {
     bool castle_k;
     bool castle_q;
     int en_passant;
+    unsigned long long hash;
     uint fifty_move;
     int ply_number;
 
