@@ -19,6 +19,7 @@ void Engine::think(const Time& t) {
     }
     // current time
     auto start = now();
+    nodes = 0;
 
     std::cout << "info string thinking for " << thinktime << "ms" << std::endl;
 
