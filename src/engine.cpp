@@ -13,7 +13,7 @@ void Engine::set_move(Move move) {
 
 void Engine::think(const Time& t) {
     // currently only supports infinite and wtime/btime
-    long long thinktime = board.is_white ? t.wtime / 40 : t.btime / 40;
+    long long thinktime = board.is_white ? t.wtime / 20 : t.btime / 20;
     if (t.infinite) {
         thinktime = 1e9;
     }
