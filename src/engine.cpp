@@ -25,10 +25,17 @@ void Engine::think(const Time& t) {
     std::cout << "info string thinking for " << thinktime << "ms" << std::endl;
 
     long long think_until = now() + thinktime;
+    std::vector<long long> depth_times;
+    double factor = 4.0;
+    double cutting_strength = 1.0;
+    depth_times.reserve(32);
 
     for (int depth = 1; think_until > now() && !stop; ++depth) {
         // search
+        long long depth_start = now();
         std::pair<int, Move> p = alpha_beta(*this, board, depth, -1e9, 1e9, stop, think_until);
+        depth_times.push_back(now() - depth_start);
+
         // we shouldn't trust the output if it aborted, but if it's d1 it's better than nothing
         if ((!stop && now() <= think_until) || depth == 1) {
             set_move(p.second);
@@ -42,6 +49,23 @@ void Engine::think(const Time& t) {
                       << " nps " << nodes*1000/(elapsed_ms+1)
                       << " pv " << p.second.to_str()
                       << std::endl;
+
+            // break early if definitely not enough time for next depth
+            if (!t.infinite) {
+                if (auto before_back = *(depth_times.end() - 2); depth_times.size() > 2) {
+                    double current_factor = (double)(depth_times.back()+1)/(before_back+1);
+                    factor = 0.8*factor + 0.2*current_factor;
+                }
+                std::cout << "info string budget: " << think_until - now() << '\n'
+                          << "info string estimate: " << depth_times.back() * factor << '\n'
+                          << "info string factor: " << factor << '\n'
+                          << "info string cutting_strength: " << cutting_strength
+                          << std::endl;
+                if (depth_times.back() * factor * cutting_strength > think_until - now()) {
+                    std::cout << "info string halting search early" << std::endl;
+                    break;
+                }
+            }
         }
     }
     stop = true;
