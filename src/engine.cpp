@@ -24,7 +24,10 @@ void Engine::think(const Time& t) {
 
     std::cout << "info string thinking for " << thinktime << "ms" << std::endl;
 
-    long long think_until = now() + thinktime;
+    // TODO: prefer allocating surplus to harder positions
+    long long think_until = now() + thinktime + this->surplus;
+    this->surplus = 0;
+
     std::vector<long long> depth_times;
     double factor = 4.0;
     double cutting_strength = 1.0;
@@ -62,6 +65,7 @@ void Engine::think(const Time& t) {
                           << "info string cutting_strength: " << cutting_strength
                           << std::endl;
                 if (depth_times.back() * factor * cutting_strength > think_until - now()) {
+                    this->surplus += think_until - now(); // we've saved this much
                     std::cout << "info string halting search early" << std::endl;
                     break;
                 }

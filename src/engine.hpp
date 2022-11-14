@@ -22,4 +22,5 @@ struct Engine {
     std::thread thread;
     std::atomic<bool> stop;
     std::atomic<int> nodes;
+    std::atomic<long long> surplus{0};
 };
