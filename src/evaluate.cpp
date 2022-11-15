@@ -1,5 +1,8 @@
 #include "move.hpp"
 #include "evaluate.hpp"
+#include "constants.hpp"
+
+#include <iostream>
 
 int doubled_pawns(const Board& board) {
     int eval = 0;
@@ -11,6 +14,36 @@ int doubled_pawns(const Board& board) {
         }
         if (w_pawns > 1) eval -= (w_pawns-1)*50;
         if (b_pawns > 1) eval += (b_pawns-1)*50;
+    }
+    return eval;
+}
+
+int passed_pawns(const Board& board) {
+    int eval = 0;
+    std::vector<int> back_b{100, 100, 100, 100, 100, 100, 100, 100, 100, 100};
+    std::vector<int> back_w{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    std::vector<int> forward_w{100, 100, 100, 100, 100, 100, 100, 100, 100, 100};
+    std::vector<int> forward_b{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    for (int file = 1; file < 9; ++file) {
+        for (int rank = 20; rank < 90; rank += 10) {
+            if (board.board[rank+file] == PAWN_W && back_w[file] < rank) {
+                back_w[file] = rank;
+            } else if (board.board[rank+file] == PAWN_B && back_b[file] > rank) {
+                back_b[file] = rank;
+            }
+            if (board.board[rank+file] == PAWN_W && forward_w[file] > rank) {
+                forward_w[file] = rank;
+            } else if (board.board[rank+file] == PAWN_B && forward_b[file] < rank) {
+                forward_b[file] = rank;
+            }
+        }
+    }
+
+    for (auto i = 1; i < 9; ++i) {
+        if (back_b[i] == 100 && forward_w[i] != 100 && forward_w[i]-10 <= back_b[i-1] && forward_w[i]-10 <= back_b[i+1])
+            eval += 50;
+        if (back_w[i] == -1 && forward_b[i] != -1 && forward_b[i]+10 >= back_w[i-1] && forward_b[i]+10 >= back_w[i+1])
+            eval -= 50;
     }
     return eval;
 }
@@ -67,5 +100,6 @@ int evaluate(const Board& board) {
     }
     eval -= king_distance(board, eval);
     eval += doubled_pawns(board);
+    eval += passed_pawns(board);
     return sign * eval;
 }
