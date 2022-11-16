@@ -290,19 +290,19 @@ inline void Board::add_king_moves(generator_sig) const {
 
 std::vector<Move> Board::pseudo_legal_moves() const {
     std::vector<Move> pseudo_legal_moves;
-    std::unordered_map<int, std::function<void(generator_sig)>> generators = {
-        {PAWN_W, [this](generator_sig){add_pawn_moves(moves, start);}},
-        {PAWN_B, [this](generator_sig){add_pawn_moves(moves, start);}},
-        {KNIGHT_W, [this](generator_sig){add_knight_moves(moves, start);}},
-        {KNIGHT_B, [this](generator_sig){add_knight_moves(moves, start);}},
-        {BISHOP_W, [this](generator_sig){add_bishop_moves(moves, start);}},
-        {BISHOP_B, [this](generator_sig){add_bishop_moves(moves, start);}},
-        {ROOK_W, [this](generator_sig){add_rook_moves(moves, start);}},
-        {ROOK_B, [this](generator_sig){add_rook_moves(moves, start);}},
-        {QUEEN_W, [this](generator_sig){add_queen_moves(moves, start);}},
-        {QUEEN_B, [this](generator_sig){add_queen_moves(moves, start);}},
-        {KING_W, [this](generator_sig){add_king_moves(moves, start);}},
-        {KING_B, [this](generator_sig){add_king_moves(moves, start);}}
+    static const std::unordered_map<int, std::function<void(const Board*, generator_sig)>> generators = {
+        {PAWN_W, [](const Board* board_ptr, generator_sig){board_ptr->add_pawn_moves(moves, start);}},
+        {PAWN_B, [](const Board* board_ptr, generator_sig){board_ptr->add_pawn_moves(moves, start);}},
+        {KNIGHT_W, [](const Board* board_ptr, generator_sig){board_ptr->add_knight_moves(moves, start);}},
+        {KNIGHT_B, [](const Board* board_ptr, generator_sig){board_ptr->add_knight_moves(moves, start);}},
+        {BISHOP_W, [](const Board* board_ptr, generator_sig){board_ptr->add_bishop_moves(moves, start);}},
+        {BISHOP_B, [](const Board* board_ptr, generator_sig){board_ptr->add_bishop_moves(moves, start);}},
+        {ROOK_W, [](const Board* board_ptr, generator_sig){board_ptr->add_rook_moves(moves, start);}},
+        {ROOK_B, [](const Board* board_ptr, generator_sig){board_ptr->add_rook_moves(moves, start);}},
+        {QUEEN_W, [](const Board* board_ptr, generator_sig){board_ptr->add_queen_moves(moves, start);}},
+        {QUEEN_B, [](const Board* board_ptr, generator_sig){board_ptr->add_queen_moves(moves, start);}},
+        {KING_W, [](const Board* board_ptr, generator_sig){board_ptr->add_king_moves(moves, start);}},
+        {KING_B, [](const Board* board_ptr, generator_sig){board_ptr->add_king_moves(moves, start);}}
     };
 
     for (int i = 21; i < 99; ++i) {
@@ -314,7 +314,7 @@ std::vector<Move> Board::pseudo_legal_moves() const {
             continue;
         }
         int piece = board[i];
-        generators.at(piece)(pseudo_legal_moves, i);
+        generators.at(piece)(this, pseudo_legal_moves, i);
     }
     return pseudo_legal_moves;
 }
