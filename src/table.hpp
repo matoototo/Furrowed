@@ -23,7 +23,7 @@ struct Table {
         size = 1024*1024*megabytes / (28*11);
         init_zobrist();
     }
-    int size;
+    size_t size;
     unsigned long long zobrist[64][12];
     unsigned long long btm_hash;
     unsigned long long wk_hash;

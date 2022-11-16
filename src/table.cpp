@@ -85,7 +85,7 @@ std::pair<Entry, bool> Table::probe(const Board& b) {
     bool hit = true;
     try {
         entry = data.at(hash);
-    } catch (std::out_of_range e) {
+    } catch (std::out_of_range const& e) {
         hit = false; // miss
     }
     return {entry, hit};
