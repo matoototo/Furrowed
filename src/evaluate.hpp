@@ -3,6 +3,8 @@
 #include "board.hpp"
 #include "constants.hpp"
 
+void update_values(const Board& board, int from, int to);
+void recompute_values(const Board& board);
 int evaluate(const Board&);
 
 const std::unordered_map<int, int> piece_value_map = {

@@ -6,6 +6,7 @@
 
 #include "board.hpp"
 #include "constants.hpp"
+#include "evaluate.hpp"
 #include "table.hpp"
 
 
@@ -422,6 +423,7 @@ void Board::print_board() const {
 void Board::make_move(const Move& move, bool count, Table* table_ptr) {
     // TODO: restructure hierarchy to make passing table easier than this
     bool update_hash = table_ptr != nullptr;
+    bool should_recompute_values = false;
 
     int sign = (board[move.from] > 0) ? -1 : 1;
 
@@ -438,6 +440,7 @@ void Board::make_move(const Move& move, bool count, Table* table_ptr) {
         if (update_hash) {
             table_ptr->hash_piece(hash, killed_square, board[killed_square]);
         }
+        should_recompute_values = true;
         board[killed_square] = 0;
     }
 
@@ -455,6 +458,7 @@ void Board::make_move(const Move& move, bool count, Table* table_ptr) {
         table_ptr->hash_piece(hash, move.from, board[move.from]);
         table_ptr->hash_piece(hash, move.to, board[move.from]);
     }
+    update_values(*this, move.from, move.to);
     board[move.to] = board[move.from];
     board[move.from] = 0;
 
@@ -463,22 +467,25 @@ void Board::make_move(const Move& move, bool count, Table* table_ptr) {
         if (update_hash)
             table_ptr->hash_piece(hash, move.to, move.promotion);
         board[move.to] = move.promotion;
+        should_recompute_values = true;
     }
 
-    if (count && move.castling != 0) castles += 1;
-
-    if (move.castling == CASTLE_KW) {
-        board[F1] = board[H1];
-        board[H1] = 0;
-    } else if (move.castling == CASTLE_QW) {
-        board[D1] = board[A1];
-        board[A1] = 0;
-    } else if (move.castling == CASTLE_KB) {
-        board[F8] = board[H8];
-        board[H8] = 0;
-    } else if (move.castling == CASTLE_QB) {
-        board[D8] = board[A8];
-        board[A8] = 0;
+    if (move.castling != 0) {
+        if (count) castles += 1;
+        if (move.castling == CASTLE_KW) {
+            board[F1] = board[H1];
+            board[H1] = 0;
+        } else if (move.castling == CASTLE_QW) {
+            board[D1] = board[A1];
+            board[A1] = 0;
+        } else if (move.castling == CASTLE_KB) {
+            board[F8] = board[H8];
+            board[H8] = 0;
+        } else if (move.castling == CASTLE_QB) {
+            board[D8] = board[A8];
+            board[A8] = 0;
+        }
+        should_recompute_values = true;
     }
 
     // remove castling rights on king/rook move
@@ -541,4 +548,8 @@ void Board::make_move(const Move& move, bool count, Table* table_ptr) {
     is_white = !is_white;
     if (update_hash)
         hash ^= table_ptr->btm_hash;
+
+    if (should_recompute_values) {
+        recompute_values(*this);
+    }
 }

@@ -3,6 +3,7 @@
 #include "constants.hpp"
 
 #include <iostream>
+#include <stdexcept>
 
 int doubled_pawns(const Board& board) {
     int eval = 0;
@@ -83,10 +84,33 @@ int king_distance(const Board& board, int current_eval) {
     return sign*distance;
 }
 
+void update_values(const Board& board, int from, int to) {
+    if (board.placement_value == 1e9 || board.piece_value == 1e9) {
+        board.piece_value = 0;
+        board.placement_value = 0;
+    }
+    int piece = board.board[from];
+    int to_piece = board.board[to];
 
-int evaluate(const Board& board) {
-    int sign = board.is_white ? 1 : -1;
-    int eval = 0;
+    auto& from_plac_vec = placement_value_map.at(piece);
+    board.placement_value -= from_plac_vec.at(from);
+    board.placement_value += from_plac_vec.at(to);
+
+    if (to_piece != BLANK) {
+        auto& to_plac_vec = placement_value_map.at(to_piece);
+        board.placement_value -= to_plac_vec.at(to);
+        board.piece_value -= piece_value_map.at(to_piece);
+    }
+}
+
+void recompute_values(const Board& board) {
+    /*
+    for moves that mess with the simple piece_value/placement_value update logic
+    they're rare enough that it's fine to just recompute, but ideally we'd have
+    separate update functions for each case.
+    */
+    board.placement_value = 0;
+    board.piece_value = 0;
     for (int i = 21; i < 99; ++i) {
         if (i % 10 == 9) {
             i += 1;
@@ -94,10 +118,19 @@ int evaluate(const Board& board) {
         }
         int piece = board.board[i];
         if (piece != BLANK) {
-            eval += piece_value_map.at(piece);
-            eval += placement_value_map.at(piece).at(i);
+            board.piece_value += piece_value_map.at(piece);
+            board.placement_value += placement_value_map.at(piece).at(i);
         }
     }
+}
+
+int evaluate(const Board& board) {
+    int sign = board.is_white ? 1 : -1;
+    int eval = 0;
+    if (board.placement_value == 1e9 || board.piece_value == 1e9) {
+        recompute_values(board);
+    }
+    eval += board.piece_value + board.placement_value;
     eval -= king_distance(board, eval);
     eval += doubled_pawns(board);
     eval += passed_pawns(board);

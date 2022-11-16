@@ -45,6 +45,8 @@ struct Board {
     unsigned long long hash;
     uint fifty_move;
     int ply_number;
+    mutable int piece_value = 1e9;
+    mutable int placement_value = 1e9;
 
     bool operator==(const Board& other) const {
         return (
