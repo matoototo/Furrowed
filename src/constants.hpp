@@ -73,6 +73,14 @@ const std::unordered_map<int, int> index_to_canon = {
 const std::vector<int> white_promotions = {KNIGHT_W, BISHOP_W, ROOK_W, QUEEN_W};
 const std::vector<int> black_promotions = {KNIGHT_B, BISHOP_B, ROOK_B, QUEEN_B};
 
+const std::vector<int> w_pawn_directions = {-9, -11};
+const std::vector<int> b_pawn_directions = {9, 11};
+const std::vector<int> knight_directions = {-21, -19, -12, -8, 8, 12, 19, 21};
+const std::vector<int> bishop_directions = {-9, -11, 11, 9};
+const std::vector<int> rook_directions = {-1, -10, 1, 10};
+const std::vector<int> queen_directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+const std::vector<int> king_directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+
 #define A8 28
 #define B8 27
 #define C8 26

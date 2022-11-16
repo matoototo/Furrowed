@@ -169,17 +169,13 @@ void Board::add_attackers(std::vector<int>& attackers, const int square) const {
     // if any of the squares it attacks are occupied by the same piece of an opposite colour
     int sign = is_white ? -1 : 1;
     std::vector<Move> moves;
-    std::vector<int> pawn_directions = {sign*9, sign*11};
+    auto& pawn_directions = is_white ? w_pawn_directions : b_pawn_directions;
+
     add_moves(moves, pawn_directions, square, false, PAWN_W*sign);
-    std::vector<int> knight_directions = {-21, -19, -12, -8, 8, 12, 19, 21};
     add_moves(moves, knight_directions, square, false, KNIGHT_W*sign);
-    std::vector<int> bishop_directions = {-9, -11, 11, 9};
     add_moves(moves, bishop_directions, square, true, BISHOP_W*sign);
-    std::vector<int> rook_directions = {-1, -10, 1, 10};
     add_moves(moves, rook_directions, square, true, ROOK_W*sign);
-    std::vector<int> queen_directions = {-1, -10, 1, 10, -11, -9, 9, 11};
     add_moves(moves, queen_directions, square, true, QUEEN_W*sign);
-    std::vector<int> king_directions = {-1, -10, 1, 10, -11, -9, 9, 11};
     add_moves(moves, king_directions, square, false, KING_W*sign);
 
     for (auto move : moves) {
@@ -231,27 +227,27 @@ inline void Board::add_pawn_moves(generator_sig) const {
 }
 
 inline void Board::add_knight_moves(generator_sig) const {
-    std::vector<int> directions = {-21, -19, -12, -8, 8, 12, 19, 21};
+    auto& directions = knight_directions;
     add_moves(moves, directions, start, false);
 }
 
 inline void Board::add_bishop_moves(generator_sig) const {
-    std::vector<int> directions = {-9, -11, 11, 9};
+    auto& directions = bishop_directions;
     add_moves(moves, directions, start, true);
 }
 
 inline void Board::add_rook_moves(generator_sig) const {
-    std::vector<int> directions = {-1, -10, 1, 10};
+    auto& directions = rook_directions;
     add_moves(moves, directions, start, true);
 }
 
 inline void Board::add_queen_moves(generator_sig) const {
-    std::vector<int> directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+    auto& directions = queen_directions;
     add_moves(moves, directions, start, true);
 }
 
 inline void Board::add_king_moves(generator_sig) const {
-    std::vector<int> directions = {-1, -10, 1, 10, -11, -9, 9, 11};
+    auto& directions = king_directions;
     add_moves(moves, directions, start, false);
 
 
