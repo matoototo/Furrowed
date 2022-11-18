@@ -13,6 +13,8 @@ inline int en_passants = 0;
 inline int castles = 0;
 inline int promotions = 0;
 
+bool is_capture(const Board& board, const Move& move);
+
 struct Board {
     Board() {
         reset_board();

@@ -329,13 +329,6 @@ bool is_check(const Board& board, const Move& move) {
     return board_copy.is_in_check(board_copy.find_king());
 }
 
-std::function<bool(const Move&, const Move&)> move_order(const Board& board) {
-    return [&board](const Move& a, const Move& b) {
-        if (is_capture(board, a) && !is_capture(board, b)) return true;
-        // if (is_check(board, a) && !is_check(board, b)) return true; TODO: segfault
-        return false;
-    };
-}
 
 std::vector<Move> Board::legal_moves() const {
     int king_square = find_king();
@@ -348,7 +341,6 @@ std::vector<Move> Board::legal_moves() const {
             legal_moves.push_back(move);
         }
     }
-    std::sort(legal_moves.begin(), legal_moves.end(), move_order(*this));
     return legal_moves;
 }
 
