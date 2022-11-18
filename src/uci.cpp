@@ -98,7 +98,9 @@ void UCI::run() {
             std::string move;
             is >> move;
             Board temp_board = engine.board;
-            temp_board.make_move(Move::from_str(move, temp_board));
+            if (!move.empty()) {
+                temp_board.make_move(Move::from_str(move, temp_board));
+            }
             std::cout << evaluate(temp_board) << std::endl;
         }
 
