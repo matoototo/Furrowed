@@ -46,7 +46,7 @@ void Engine::think(const Time& t) {
             std::cout << "info score cp " << p.first
                       <<  " time " << elapsed_ms
                       << " nodes " << nodes
-                      << " nps " << nodes*1000/(elapsed_ms+1)
+                      << " nps " << nodes/(elapsed_ms/1000 + 1)
                       << " pv " << p.second.to_str()
                       << std::endl;
 
